@@ -44,7 +44,7 @@ class Router
 
         [$handler, $middlewares] = $route;
 
-        foreach ($middlewares as  $middleware) {
+        foreach ($middlewares as $middleware) {
             $middlewareInstance = $this->container->make($middleware);
             $middlewareInstance->handle();
         }

@@ -132,7 +132,7 @@
                                     <?php foreach ($accounts as $index => $account): ?>
                                         <tr>
                                             <td><?= $index + 1 ?></td>
-                                            <td><?= $account['account_number'] ?></td>
+                                            <td><?= htmlspecialchars($account['account_number']) ?></td>
                                             <td>$ <?= number_format($account['balance'], 2, ',', '.') ?></td>
                                             <td>
                                                 <?= $account['account_type'] === 'SAVINGS'
@@ -226,8 +226,8 @@
                                         <?php foreach ($registeredAccounts as $index => $registeredAccount): ?>
                                             <tr>
                                                 <td><?= $index + 1 ?></td>
-                                                <td><?= $registeredAccount['account_number'] ?></td>
-                                                <td><?= $registeredAccount['first_name'] . ' ' . $registeredAccount['last_name'] ?></td>
+                                                <td><?= htmlspecialchars($registeredAccount['account_number']) ?></td>
+                                                <td><?= htmlspecialchars($registeredAccount['first_name'] . ' ' . $registeredAccount['last_name']) ?></td>
                                                 <td><?= $registeredAccount['account_type'] == 'SAVINGS' ? 'Cuenta de ahorros' : 'Cuenta corriente' ?></td>
                                                 <td>
                                                     <form method="POST" class="unregister-account-form" action="/accounts/unregister">

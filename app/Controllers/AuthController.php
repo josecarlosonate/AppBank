@@ -12,8 +12,8 @@ class AuthController
 
     public function login()
     {
-        $documentNumber = $_POST['document_number'];
-        $password = $_POST['password'];
+        $documentNumber = $_POST['document_number'] ?? '';
+        $password = $_POST['password'] ?? '';
 
         $customerData = $this->customer->findByDocumentNumber($documentNumber);
 
