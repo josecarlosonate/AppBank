@@ -4,12 +4,14 @@ namespace App\Controllers;
 
 use App\Enums\TransferResult;
 use App\Services\TransferService;
+use App\Models\Account;
 
 class TransactionController
 {
 
     public function __construct(
-        private TransferService $transferService
+        private TransferService $transferService,
+        private Account $account
     ) {}
 
     private function redirect(string $location): never
@@ -99,5 +101,18 @@ class TransactionController
             $_SESSION['error'] = 'No fue posible realizar la transferencia.';
             $this->redirect('/transfers');
         }
+    }
+
+    public function index()
+    {
+        $customerId = (int) $_SESSION['customer_id'];
+
+        // obtener cuentas propias
+        $sourceAccounts = $this->account->findByCustomerId($customerId);
+
+        // obtener cuentas registradas
+        $registeredAccounts = $this->account->findRegisteredByCustomerId($customerId);
+
+        require __DIR__ . '/../views/transfers/index.php';
     }
 }

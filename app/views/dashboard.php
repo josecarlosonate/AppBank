@@ -86,7 +86,7 @@
                         </h4>
 
                         <p class="card-text text-secondary">
-                            Consulta el historial de tus transferencias.
+                            Consulta el historial de movimientos de tus cuentas.
                         </p>
 
                         <a href="/transactions" class="btn btn-outline-success">

@@ -70,3 +70,8 @@ $router->post(
     [TransactionController::class, 'store'],
     [AuthMiddleware::class, CsrfMiddleware::class]
 );
+$router->get(
+    '/transfers',
+    [TransactionController::class, 'index'],
+    [AuthMiddleware::class]
+);
