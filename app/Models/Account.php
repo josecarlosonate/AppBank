@@ -56,7 +56,7 @@ class Account
         ]);
     }
 
-    public function create(int $customerId, string $accountNumber, string $accountType, float $balance): bool
+    public function create(int $customerId, string $accountNumber, string $accountType, string $balance): bool
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO accounts ( customer_id, account_number, account_type, balance, is_active )
@@ -174,5 +174,53 @@ class Account
         ]);
 
         return $result && $stmt->rowCount() > 0;
+    }
+
+    // Buscar cuenta
+    public function findById(int $accountId): array|false
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, customer_id, balance, is_active
+         FROM accounts
+         WHERE id = :account_id"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId
+        ]);
+
+        return $stmt->fetch();
+    }
+
+    // Restar saldo de transferencia
+    public function debit(int $accountId, string $amount): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE accounts SET balance = balance - :amount
+            WHERE id = :account_id and balance >= :amount"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId,
+            'amount' => $amount
+        ]);
+
+        return $stmt->rowCount() === 1;
+    }
+
+    // Sumar saldo de transferencia
+    public function credit(int $accountId, string $amount): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE accounts SET balance = balance + :amount
+            WHERE id = :account_id"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId,
+            'amount' => $amount
+        ]);
+
+        return $stmt->rowCount() === 1;
     }
 }
