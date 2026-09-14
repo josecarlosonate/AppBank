@@ -27,10 +27,11 @@ class Account
         return $stmt->fetchAll();
     }
 
+    // obtener cuenta especifica de usuario especifico
     public function findByIdAndCustomerId(int $accountId, int $customerId): array|false
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, is_active FROM accounts
+            "SELECT id, balance, is_active FROM accounts
                 WHERE id = :account_id AND customer_id = :customer_id"
         );
 
@@ -56,7 +57,7 @@ class Account
         ]);
     }
 
-    public function create(int $customerId, string $accountNumber, string $accountType, float $balance): bool
+    public function create(int $customerId, string $accountNumber, string $accountType, string $balance): bool
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO accounts ( customer_id, account_number, account_type, balance, is_active )
@@ -174,5 +175,65 @@ class Account
         ]);
 
         return $result && $stmt->rowCount() > 0;
+    }
+
+    // Buscar cuenta
+    public function findById(int $accountId): array|false
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, customer_id, balance, is_active
+         FROM accounts
+         WHERE id = :account_id"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId
+        ]);
+
+        return $stmt->fetch();
+    }
+
+    // Restar saldo de transferencia
+    public function debit(int $accountId, string $amount): array|false
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE accounts SET balance = balance - :debit_amount
+            WHERE id = :account_id 
+            AND balance >= :amount 
+            AND is_active = 1"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId,
+            'debit_amount' => $amount,
+            'amount' => $amount
+        ]);
+
+        if ($stmt->rowCount() !== 1) {
+            return false;
+        }
+
+        return $this->findById($accountId);
+    }
+
+    // Sumar saldo de transferencia
+    public function credit(int $accountId, string $amount): array|false
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE accounts SET balance = balance + :amount
+            WHERE id = :account_id 
+            AND is_active = 1"
+        );
+
+        $stmt->execute([
+            'account_id' => $accountId,
+            'amount' => $amount
+        ]);
+
+        if ($stmt->rowCount() !== 1) {
+            return false;
+        }
+
+        return $this->findById($accountId);
     }
 }
