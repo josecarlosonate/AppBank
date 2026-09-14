@@ -27,10 +27,11 @@ class Account
         return $stmt->fetchAll();
     }
 
+    // obtener cuenta especifica de usuario especifico
     public function findByIdAndCustomerId(int $accountId, int $customerId): array|false
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, is_active FROM accounts
+            "SELECT id, balance, is_active FROM accounts
                 WHERE id = :account_id AND customer_id = :customer_id"
         );
 
@@ -193,27 +194,35 @@ class Account
     }
 
     // Restar saldo de transferencia
-    public function debit(int $accountId, string $amount): bool
+    public function debit(int $accountId, string $amount): array|false
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE accounts SET balance = balance - :amount
-            WHERE id = :account_id and balance >= :amount"
+            "UPDATE accounts SET balance = balance - :debit_amount
+            WHERE id = :account_id 
+            AND balance >= :amount 
+            AND is_active = 1"
         );
 
         $stmt->execute([
             'account_id' => $accountId,
+            'debit_amount' => $amount,
             'amount' => $amount
         ]);
 
-        return $stmt->rowCount() === 1;
+        if ($stmt->rowCount() !== 1) {
+            return false;
+        }
+
+        return $this->findById($accountId);
     }
 
     // Sumar saldo de transferencia
-    public function credit(int $accountId, string $amount): bool
+    public function credit(int $accountId, string $amount): array|false
     {
         $stmt = $this->pdo->prepare(
             "UPDATE accounts SET balance = balance + :amount
-            WHERE id = :account_id"
+            WHERE id = :account_id 
+            AND is_active = 1"
         );
 
         $stmt->execute([
@@ -221,6 +230,10 @@ class Account
             'amount' => $amount
         ]);
 
-        return $stmt->rowCount() === 1;
+        if ($stmt->rowCount() !== 1) {
+            return false;
+        }
+
+        return $this->findById($accountId);
     }
 }

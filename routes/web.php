@@ -2,6 +2,7 @@
 
 use App\Controllers\AccountsController;
 use App\Controllers\AuthController;
+use App\Controllers\TransactionController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\CsrfMiddleware;
 
@@ -60,5 +61,12 @@ $router->post(
 $router->post(
     '/accounts/unregister',
     [AccountsController::class, 'unregister'],
+    [AuthMiddleware::class, CsrfMiddleware::class]
+);
+
+// Rutas protegidas - Transferencias
+$router->post(
+    '/transfers',
+    [TransactionController::class, 'store'],
     [AuthMiddleware::class, CsrfMiddleware::class]
 );

@@ -18,21 +18,37 @@ class TransferService
     ) {}
 
     public function transfer(
+        int $customerId,
         int $sourceAccountId,
         int $destinationAccountId,
         string $amount,
         ?string $concept = null
     ): TransferResult {
 
-        // validar que exista cuenta de origen y destino
-        $sourceAccount = $this->account->findById($sourceAccountId);
+        //validar que cuenta origen y destino no sean la misma cuenta
+        if ($sourceAccountId === $destinationAccountId) {
+            return TransferResult::SAME_ACCOUNT;
+        }
+
+        //validar: Usuario ¿estás autorizado para transferir desde esta cuenta?
+        $sourceAccount = $this->account->findByIdAndCustomerId($sourceAccountId, $customerId);
         if (!$sourceAccount) {
             return TransferResult::SOURCE_ACCOUNT_NOT_FOUND;
         }
 
+        //validar que cuenta destino exista
         $destinationAccount = $this->account->findById($destinationAccountId);
         if (!$destinationAccount) {
             return TransferResult::DESTINATION_ACCOUNT_NOT_FOUND;
+        }
+
+        /* El usuario puede transferir hacia otra cuenta propia 
+         o una cuenta de terceros previamente registrada. */
+        $destinationIsOwnAccount = $this->account->findByIdAndCustomerId($destinationAccountId, $customerId);
+        $destinationIsRegistered = $this->account->isAlreadyRegistered($customerId, $destinationAccountId);
+
+        if (!$destinationIsOwnAccount && !$destinationIsRegistered) {
+            return TransferResult::DESTINATION_ACCOUNT_NOT_ALLOWED;
         }
 
         // validar monto - saldo insuficiente : saldo < monto a enviar
@@ -54,27 +70,18 @@ class TransferService
 
         try {
 
-            $debited = $this->account->debit($sourceAccountId, $amount);
-            if (!$debited) {
+            $sourceAccountAfterDebit = $this->account->debit($sourceAccountId, $amount);
+            if (!$sourceAccountAfterDebit) {
                 throw new \RuntimeException('No se pudo debitar la cuenta de origen.');
             }
 
-            $credited = $this->account->credit($destinationAccountId, $amount);
-            if (!$credited) {
-                throw new \RuntimeException('No se se puedo acreditar la cuenta destino.');
+            $destinationAccountAfterCredit = $this->account->credit($destinationAccountId, $amount);
+            if (!$destinationAccountAfterCredit) {
+                throw new \RuntimeException('No se puedo acreditar la cuenta destino.');
             }
 
             //crear transferencia
             $transactionId = $this->transaction->create($sourceAccountId, $destinationAccountId, $amount, $concept);
-
-            // obtener saldo de de origen y destino despues de una transferencia
-            $sourceAccountAfterDebit = $this->account->findById($sourceAccountId);
-            $destinationAccountAfterCredit = $this->account->findById($destinationAccountId);
-            if (!$sourceAccountAfterDebit || !$destinationAccountAfterCredit) {
-                throw new \RuntimeException(
-                    'No se pudieron obtener los saldos actualizados.'
-                );
-            }
 
             // guardar movimientos generados por la transferencia
             $debitMovement = $this->movement->create($transactionId, $sourceAccountId, 'DEBIT', $sourceAccountAfterDebit['balance']);
