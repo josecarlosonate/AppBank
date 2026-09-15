@@ -163,7 +163,11 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5>Resumen de movimientos</h5>
-                            <canvas id="movementsChart"></canvas>
+                            <?php if ($accountId !== null): ?>
+                                <canvas id="movementsChart" data-account-id="<?= (int) $accountId ?>">
+
+                                </canvas>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

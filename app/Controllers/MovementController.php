@@ -55,22 +55,33 @@ class MovementController
         return $movementsByDate;
     }
 
-    public function monthlySummary(int $accountId)
+    public function monthlySummary()
     {
         header('Content-Type: application/json');
+
         $customerId = (int) $_SESSION['customer_id'];
+
+        $accountId = filter_var(
+            $_GET['account_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if ($accountId === false) {
+            http_response_code(422);
+            echo json_encode(['error' => 'Cuenta inválida.']);
+            exit;
+        }
 
         if ($this->account->findByIdAndCustomerId($accountId, $customerId) === false) {
             http_response_code(403);
-            echo json_encode([
-                'error' => 'La cuenta seleccionada no está disponible.'
-            ]);
+            echo json_encode(['error' => 'La cuenta seleccionada no está disponible.']);
             exit;
         }
 
         //Obtener el resumen mensual
         $monthlySummary = $this->movement->getMonthlySummaryByAccountId($accountId);
 
-        return json_encode($monthlySummary);
+        echo json_encode($monthlySummary);
     }
 }

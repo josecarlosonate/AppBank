@@ -83,3 +83,8 @@ $router->get(
     [MovementController::class, 'index'],
     [AuthMiddleware::class]
 );
+$router->get(
+    '/movements/summary',
+    [MovementController::class, 'monthlySummary'],
+    [AuthMiddleware::class]
+);
