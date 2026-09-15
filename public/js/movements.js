@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const labels = monthlySummary.map((item) => {
       const [year, month] = item.month.split("-");
-      const date = new Date(Number(year), Number(month));
+      const date = new Date(Number(year), Number(month) - 1);
 
       const monthName = new Intl.DateTimeFormat("es-CO", {
         month: "long",
