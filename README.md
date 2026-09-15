@@ -28,6 +28,27 @@ mantener separadas las responsabilidades de la aplicación.
 
 ---
 
+## ¿Qué problema resuelve?
+
+Modela las operaciones básicas de un banco digital:
+
+- Centraliza la gestión básica de productos bancarios de un cliente en
+  una sola aplicación.
+- Un cliente puede tener varias cuentas.
+- Puede activar o desactivar sus cuentas.
+- Puede inscribir cuentas de otros clientes como destinatarios.
+- Puede realizar transferencias entre cuentas autorizadas.
+- Puede consultar los movimientos de sus cuentas.
+- Puede visualizar un resumen mensual de débitos y créditos.
+- El sistema valida propiedad, estado y reglas de negocio antes de
+  operar.
+
+El objetivo del proyecto es demostrar diseño limpio, separación de
+responsabilidades, seguridad y control de acceso sobre recursos en una
+aplicación PHP real.
+
+---
+
 ## Capturas de pantalla
 
 ### Inicio de sesión
@@ -95,27 +116,6 @@ una gráfica generada con Chart.js.
     width="900"
   >
 </p>
-
----
-
-## ¿Qué problema resuelve?
-
-Modela las operaciones básicas de un banco digital:
-
-- Centraliza la gestión básica de productos bancarios de un cliente en
-  una sola aplicación.
-- Un cliente puede tener varias cuentas.
-- Puede activar o desactivar sus cuentas.
-- Puede inscribir cuentas de otros clientes como destinatarios.
-- Puede realizar transferencias entre cuentas autorizadas.
-- Puede consultar los movimientos de sus cuentas.
-- Puede visualizar un resumen mensual de débitos y créditos.
-- El sistema valida propiedad, estado y reglas de negocio antes de
-  operar.
-
-El objetivo del proyecto es demostrar diseño limpio, separación de
-responsabilidades, seguridad y control de acceso sobre recursos en una
-aplicación PHP real.
 
 ---
 
