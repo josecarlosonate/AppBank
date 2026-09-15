@@ -58,7 +58,7 @@ privadas mediante sesiones y middleware.
 
 <p align="center">
   <img
-    src="docs/screenshots/login.png"
+    src="docs/screenshots/01-login.png"
     alt="Inicio de sesión de AppBank"
     width="900"
   >
@@ -71,7 +71,7 @@ y movimientos.
 
 <p align="center">
   <img
-    src="docs/screenshots/dashboard.png"
+    src="docs/screenshots/02-dashboard.png"
     alt="Panel principal de AppBank"
     width="900"
   >
@@ -84,7 +84,7 @@ activar o desactivar cuentas y administrar cuentas de terceros inscritas.
 
 <p align="center">
   <img
-    src="docs/screenshots/accounts.png"
+    src="docs/screenshots/03-accounts.png"
     alt="Gestión de cuentas en AppBank"
     width="900"
   >
@@ -97,7 +97,7 @@ hacia otra cuenta propia o una cuenta previamente inscrita.
 
 <p align="center">
   <img
-    src="docs/screenshots/transfer.png"
+    src="docs/screenshots/04-transfer.png"
     alt="Transferencias en AppBank"
     width="900"
   >
@@ -111,7 +111,7 @@ una gráfica generada con Chart.js.
 
 <p align="center">
   <img
-    src="docs/screenshots/movements.png"
+    src="docs/screenshots/05-movements.png"
     alt="Historial y resumen mensual de movimientos en AppBank"
     width="900"
   >
