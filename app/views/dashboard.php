@@ -89,7 +89,7 @@
                             Consulta el historial de movimientos de tus cuentas.
                         </p>
 
-                        <a href="/transactions" class="btn btn-outline-success">
+                        <a href="/movements" class="btn btn-outline-success">
                             Ver movimientos
                         </a>
                     </div>

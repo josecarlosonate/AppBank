@@ -77,7 +77,7 @@ class TransferService
 
             $destinationAccountAfterCredit = $this->account->credit($destinationAccountId, $amount);
             if (!$destinationAccountAfterCredit) {
-                throw new \RuntimeException('No se puedo acreditar la cuenta destino.');
+                throw new \RuntimeException('No se pudo acreditar la cuenta destino.');
             }
 
             //crear transferencia

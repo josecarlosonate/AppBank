@@ -2,6 +2,7 @@
 
 use App\Controllers\AccountsController;
 use App\Controllers\AuthController;
+use App\Controllers\MovementController;
 use App\Controllers\TransactionController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\CsrfMiddleware;
@@ -73,5 +74,17 @@ $router->post(
 $router->get(
     '/transfers',
     [TransactionController::class, 'index'],
+    [AuthMiddleware::class]
+);
+
+// Rutas protegidas - historial de movimientos
+$router->get(
+    '/movements',
+    [MovementController::class, 'index'],
+    [AuthMiddleware::class]
+);
+$router->get(
+    '/movements/summary',
+    [MovementController::class, 'monthlySummary'],
     [AuthMiddleware::class]
 );
