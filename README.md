@@ -13,22 +13,20 @@ mantener separadas las responsabilidades de la aplicación.
 
 ## Contenido
 
-- [¿Qué problema resuelve?](#qué-problema-resuelve)
+- [Sobre el proyecto](#sobre-el-proyecto)
 - [Capturas de pantalla](#capturas-de-pantalla)
-- [Funcionalidades actuales](#funcionalidades-actuales)
+- [Funcionalidades](#funcionalidades)
 - [Stack](#stack)
 - [Arquitectura](#arquitectura)
 - [Decisiones técnicas](#decisiones-técnicas)
 - [Modelo de datos](#modelo-de-datos)
-- [Reglas importantes](#reglas-importantes)
-- [Flujo de una transferencia](#flujo-de-una-transferencia)
-- [Resumen mensual de movimientos](#resumen-mensual-de-movimientos)
+- [Reglas de negocio](#reglas-de-negocio)
 - [Cómo ejecutar el proyecto](#cómo-ejecutar-el-proyecto)
 - [Autor](#autor)
 
 ---
 
-## ¿Qué problema resuelve?
+## Sobre el proyecto
 
 Modela las operaciones básicas de un banco digital:
 
@@ -44,8 +42,8 @@ Modela las operaciones básicas de un banco digital:
   operar.
 
 El objetivo del proyecto es demostrar diseño limpio, separación de
-responsabilidades, seguridad y control de acceso sobre recursos en una
-aplicación PHP real.
+responsabilidades, seguridad y control de acceso a recursos 
+utilizando **PHP nativo**.
 
 ---
 
@@ -119,7 +117,7 @@ una gráfica generada con Chart.js.
 
 ---
 
-## Funcionalidades actuales
+## Funcionalidades
 
 ### Autenticación
 
@@ -198,6 +196,7 @@ una gráfica generada con Chart.js.
 - **jQuery**
 - **Fetch API (AJAX)**
 - **Chart.js**
+- SweetAlert2
 
 ### Base de datos
 
@@ -295,7 +294,7 @@ operación (`balance_after`).
 
 ---
 
-## Reglas importantes
+## Reglas de negocio
 
 - Un cliente puede tener múltiples cuentas.
 - Una cuenta pertenece a un único cliente.
@@ -312,85 +311,6 @@ operación (`balance_after`).
 - Una transferencia debe ejecutarse completamente o revertirse.
 - Cada transacción genera los movimientos correspondientes de débito y
   crédito.
-
----
-
-## Flujo de una transferencia
-
-```text
-Usuario
-  ↓
-Router
-  ↓
-AuthMiddleware + CsrfMiddleware
-  ↓
-TransactionController
-  ↓
-TransferService
-  ↓
-Account + Transaction + Movement
-  ↓
-PDO
-  ↓
-MySQL
-```
-
-`TransferService` coordina la operación dentro de una transacción de
-base de datos:
-
-```text
-BEGIN
-  ↓
-Validar cuentas y reglas de negocio
-  ↓
-Debitar cuenta origen
-  ↓
-Acreditar cuenta destino
-  ↓
-Registrar transaction
-  ↓
-Registrar movimiento DEBIT
-  ↓
-Registrar movimiento CREDIT
-  ↓
-COMMIT
-```
-
-Si ocurre una excepción durante el proceso, la operación se revierte
-mediante `ROLLBACK`.
-
----
-
-## Resumen mensual de movimientos
-
-El módulo de movimientos consulta el historial de una cuenta y genera un
-resumen mensual de débitos y créditos.
-
-El navegador solicita los datos de forma asíncrona:
-
-```text
-movements.js
-  ↓
-Fetch API
-  ↓
-GET /movements/summary?account_id={id}
-  ↓
-AuthMiddleware
-  ↓
-MovementController
-  ↓
-Movement
-  ↓
-MySQL
-  ↓
-JSON
-  ↓
-Chart.js
-```
-
-La agregación mensual se realiza en la base de datos y Chart.js utiliza
-el resultado para construir una gráfica comparativa de débitos y
-créditos.
 
 ---
 
