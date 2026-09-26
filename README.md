@@ -1,5 +1,10 @@
 # AppBank
 
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-MVC-informational)
+
 Aplicación de banca digital simulada construida en **PHP nativo** con
 arquitectura MVC.
 
@@ -8,6 +13,8 @@ cuentas, inscribir cuentas de terceros, realizar transferencias y
 consultar el historial y resumen mensual de sus movimientos, aplicando
 reglas de negocio, controles de seguridad y una arquitectura orientada a
 mantener separadas las responsabilidades de la aplicación.
+
+> Proyecto de portafolio enfocado en fundamentos de arquitectura backend con PHP nativo, incluyendo routing, middleware e inyección de dependencias mediante componentes propios.
 
 ---
 
