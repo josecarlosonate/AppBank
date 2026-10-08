@@ -23,6 +23,8 @@ mantener separadas las responsabilidades de la aplicación.
 - [Sobre el proyecto](#sobre-el-proyecto)
 - [Capturas de pantalla](#capturas-de-pantalla)
 - [Funcionalidades](#funcionalidades)
+- [Uso de la aplicación](#uso-de-la-aplicación)
+- [Credenciales de prueba](#credenciales-de-prueba)
 - [Stack](#stack)
 - [Arquitectura](#arquitectura)
 - [Decisiones técnicas](#decisiones-técnicas)
@@ -182,6 +184,57 @@ una gráfica generada con Chart.js.
 - Prepared statements mediante PDO.
 - Validaciones de entrada tanto en cliente como en servidor.
 - Constraints de integridad en la base de datos.
+
+---
+
+## Uso de la aplicación
+
+Una vez iniciada la aplicación, inicia sesión con cualquiera de las [credenciales de prueba](#credenciales-de-prueba). El panel principal permite acceder a la gestión de cuentas, transferencias y movimientos.
+
+### Caso de uso 1: Administrar cuentas propias
+
+1. Inicia sesión con un cliente de prueba.
+2. Accede al módulo de cuentas.
+3. Consulta las cuentas asociadas al cliente, su tipo, saldo y estado.
+4. Desde este módulo puedes crear una nueva cuenta o activar/desactivar una cuenta existente.
+
+La aplicación valida que el cliente autenticado sea propietario de la cuenta antes de permitir cambios de estado.
+
+### Caso de uso 2: Inscribir un destinatario y realizar una transferencia
+
+1. Inicia sesión con un cliente que tenga una cuenta activa.
+2. Accede a la gestión de cuentas inscritas y registra una cuenta perteneciente a otro cliente utilizando su número de cuenta y documento.
+3. Accede al módulo de transferencias.
+4. Selecciona una cuenta propia activa como origen y la cuenta inscrita como destino.
+5. Indica un monto mayor a cero y confirma la operación.
+
+Antes de ejecutar la transferencia, AppBank valida propiedad, estado de las cuentas, saldo disponible y que origen y destino sean diferentes. La operación se ejecuta dentro de una transacción de base de datos y genera los movimientos de débito y crédito correspondientes.
+
+### Caso de uso 3: Consultar movimientos y resumen mensual
+
+1. Accede al módulo de movimientos.
+2. Selecciona una de las cuentas del cliente.
+3. Consulta el historial agrupado por fecha, incluyendo tipo de movimiento, concepto, monto, hora y saldo resultante.
+4. Revisa el resumen mensual de débitos y créditos representado mediante Chart.js.
+
+El resumen mensual se obtiene de forma asíncrona mediante Fetch API desde un endpoint JSON protegido.
+
+---
+
+## Credenciales de prueba
+
+La base de datos incluye cuatro clientes de prueba. Todos utilizan la contraseña `Test123`.
+
+| Cliente | Documento | Cuentas | Activas | Inactivas |
+| --- | --- | ---: | ---: | ---: |
+| Jose Demo | `123456789` | 2 | 2 | 0 |
+| Jhon Doe | `987654321` | 2 | 2 | 0 |
+| Maria Lopez | `456789123` | 2 | 2 | 0 |
+| Carlos Martinez | `741852963` | 2 | 1 | 1 |
+
+En total, los datos de prueba incluyen **8 cuentas: 7 activas y 1 inactiva**.
+
+> Estas credenciales están destinadas exclusivamente al entorno local de desarrollo.
 
 ---
 
@@ -382,14 +435,7 @@ La base de datos se inicializa automáticamente durante la primera ejecución ut
 - database/seed.sql
 ```
 
-Credenciales de prueba
-
-Puedes iniciar sesión con:
-
-```text
-- Documento: 123456789
-- Contraseña: Test123
-```
+Para iniciar sesión, utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba).
 
 Detener el proyecto con
 
@@ -480,12 +526,7 @@ el virtual host al directorio **public/**
    http://localhost:8000
 ```
 
-10. Credenciales de prueba:
-
-```text
-Documento: 123456789
-Contraseña: Test123
-```
+10. Utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
 
 ---
 
