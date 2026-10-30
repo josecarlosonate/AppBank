@@ -136,7 +136,7 @@ try {
         $registered = [];
         $transaction = $pdo->prepare('INSERT INTO transactions (source_account_id, destination_account_id, amount, concept, created_at) VALUES (?, ?, ?, ?, ?)');
         $movement = $pdo->prepare('INSERT INTO movements (transaction_id, account_id, type, balance_after) VALUES (?, ?, ?, ?)');
-        $concepts = ['Arriendo', 'Servicios del hogar', 'Mercado', 'Ahorro mensual', 'Pago de proyecto', 'Transporte', 'Reembolso de compra'];
+        $concepts = ['Transferencia personal', 'Traspaso de fondos', 'Transferencia entre cuentas'];
         $sequence = 0;
 
         for ($month = 0; $month < 6; $month++) {
