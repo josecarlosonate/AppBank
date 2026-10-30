@@ -127,6 +127,8 @@
 
                             <?php foreach ($movements as $movement): ?>
                                 <?php
+                                $concept = $movement['concept'] ?? 'Transferencia';
+                                $displayConcept = preg_replace('/^\[AppBank demo v1 #\d+\]\s*/', '', $concept);
                                 $typeClass = $movement['type'] === 'DEBIT' ? 'danger' : 'success';
                                 $formattedBalanceAfter = number_format($movement['balance_after'], 2, ',', '.');
                                 $amountSign = $movement['type'] === 'DEBIT' ? '-' : '+';
@@ -138,7 +140,7 @@
                                 <div class="row align-items-center py-3 border-bottom">
                                     <div class="col-5">
                                         <?= htmlspecialchars($movement['time']) ?> -
-                                        <?= htmlspecialchars($movement['concept'] ?? 'Transferencia') ?>
+                                        <?= htmlspecialchars($displayConcept) ?>
                                     </div>
                                     <div class="col-2 text-<?= $typeClass  ?>">
                                         <?= $movement['type'] === 'DEBIT' ? 'Débito' : 'Crédito' ?>
