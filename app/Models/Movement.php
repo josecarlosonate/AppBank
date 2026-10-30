@@ -32,10 +32,13 @@ class Movement
             t.created_at, 
             t.concept, 
             t.amount,
+            CASE WHEN m.type = 'DEBIT' THEN destination.account_number ELSE source.account_number END AS counterpart_account_number,
             m.balance_after,
             m.type
          FROM movements m 
-         INNER JOIN transactions t  ON m.transaction_id = t.id
+         INNER JOIN transactions t ON m.transaction_id = t.id
+         INNER JOIN accounts source ON source.id = t.source_account_id
+         INNER JOIN accounts destination ON destination.id = t.destination_account_id
          WHERE m.account_id = :account_id 
          ORDER BY t.created_at DESC"
         );
