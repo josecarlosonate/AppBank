@@ -296,9 +296,7 @@ config/
 
 database/
   schema.sql                → Estructura de la base de datos
-  seed.sql                  → Datos iniciales de prueba
-  seed-demo.php             → Historial de demostración
-  DEMO.md                   → Guía del seeder
+  seed.sql                  → Datos de prueba
 ```
 
 La aplicación utiliza un **Front Controller** como único punto de
@@ -450,10 +448,16 @@ docker compose down
 #### Requisitos
 
 - Git
-- PHP 8.3 con extensión `pdo_mysql`
+- PHP 8.3
 - Composer
 - MySQL 8.4
-- Apache con `mod_rewrite` habilitado (opcional si utilizas el servidor de PHP)
+- Apache con mod_rewrite habilitado
+
+PHP debe tener habilitada la extensión:
+
+```text
+   pdo_mysql
+```
 
 #### Instalación
 
@@ -464,94 +468,65 @@ git clone https://github.com/josecarlosonate/AppBank.git
 cd AppBank
 ```
 
-Para utilizar el seeder de portafolio mientras esté en esta rama:
-
-```bash
-git switch feature/portfolio-demo-seeder
-```
-
-2. Instala las dependencias:
+2. Instala las dependencias de PHP:
 
 ```bash
 composer install
 ```
 
-3. Crea el archivo de entorno:
+3. Crea el archivo de configuración .env:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Entra a MySQL con el usuario administrador. La contraseña de `root` se configura al instalar MySQL; **no es la contraseña del usuario de AppBank**:
+4. Configura las variables de tu base de datos en .env.
 
-```bash
-mysql -u root -p
-```
-
-5. Crea la base de datos y un usuario dedicado, dentro de la consola de MySQL. Sustituye la contraseña de ejemplo por una contraseña propia y guárdala para el siguiente paso:
-
-```sql
-CREATE DATABASE IF NOT EXISTS appbank_db
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_0900_ai_ci;
-
-CREATE USER IF NOT EXISTS 'appbank_user'@'localhost'
-  IDENTIFIED BY 'CAMBIA_ESTA_CONTRASENA';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-  ON appbank_db.*
-  TO 'appbank_user'@'localhost';
-```
-
-Si el usuario ya existe, `CREATE USER IF NOT EXISTS` no falla ni cambia su contraseña. Comprueba que conoces su contraseña; si necesitas restablecerla, ejecuta como administrador `ALTER USER 'appbank_user'@'localhost' IDENTIFIED BY 'TU_NUEVA_CONTRASENA';` y actualiza también `.env`. No ejecutes `ALTER USER` automáticamente en cada instalación. El usuario `root` se utiliza para tareas administrativas y para importar el esquema; `appbank_user` se utiliza para ejecutar la aplicación y cargar los datos.
-
-Sal de MySQL con `exit`.
-
-6. Configura las variables en `.env` con la contraseña elegida:
-
-```dotenv
-APP_ENV=local
+```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=appbank_db
-DB_USERNAME=appbank_user
-DB_PASSWORD="CAMBIA_ESTA_CONTRASENA"
+DB_DATABASE=appbank
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_password
+MYSQL_ROOT_PASSWORD=
 ```
 
-No publiques el archivo `.env` ni compartas contraseñas reales. `MYSQL_ROOT_PASSWORD`, si aparece en el ejemplo de entorno, corresponde a la configuración de Docker y no sustituye a `DB_PASSWORD` en la instalación manual.
+5. Crea la base de datos:
 
-7. Importa las tablas en la base recién creada. Ejecuta este comando desde la raíz del proyecto, **fuera de la consola de MySQL**:
+```sql
+CREATE DATABASE appbank
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
+```
+
+6. Importa el esquema:
 
 ```bash
-mysql -u root -p appbank_db < database/schema.sql
+mysql -u tu_usuario -p appbank < database/schema.sql
 ```
 
-8. Valida la carga de demostración sin guardar cambios:
+7. Importa los datos de prueba:
 
 ```bash
-php database/seed-demo.php --dry-run
+mysql -u tu_usuario -p appbank < database/seed.sql
 ```
 
-9. Si la validación termina correctamente, guarda los datos de demostración:
-
-```bash
-php database/seed-demo.php
-```
-
-El script utiliza `database/seed.sql` automáticamente cuando no existen clientes ni cuentas; **no es necesario importar `seed.sql` por separado**. Genera 4 clientes, 8 cuentas, 84 transferencias y 168 movimientos en seis meses, incluido el actual. Solo debe utilizarse en una base de demostración nueva o con los datos originales intactos y sin historial. Detén la aplicación mientras lo ejecutas. No está permitido en `APP_ENV=production`.
-
-10. Inicia el servidor de desarrollo:
+8. Inicia el servidor de desarrollo de PHP.
 
 ```bash
 php -S localhost:8000 -t public
 ```
 
-Alternativamente, configura Apache con `public/` como `DocumentRoot`.
+o tambien puedes configurar Apache para utilizar como DocumentRoot y apuntar
+el virtual host al directorio **public/**
 
-11. Abre `http://localhost:8000` e inicia sesión con las [credenciales de prueba](#credenciales-de-prueba).
+9. Abre la aplicación en:
 
-Para detalles y restricciones del seeder, consulta [database/DEMO.md](database/DEMO.md).
+```text
+   http://localhost:8000
+```
 
+10. Utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
 
 ---
 
