@@ -82,8 +82,27 @@ try {
     $accounts = $pdo->query('SELECT * FROM accounts ORDER BY id FOR UPDATE')->fetchAll();
     $demoCount = (int) $pdo->query("SELECT COUNT(*) FROM transactions WHERE concept LIKE '[AppBank demo v1 #%'")->fetchColumn();
     if ($demoCount === 84) {
-        $pdo->rollBack();
-        echo "La demo v1 ya está cargada. No se modificaron datos.\n";
+        // Normalize legacy demo descriptions without touching amounts or balances.
+        $legacyConcepts = ['Arriendo', 'Servicios del hogar', 'Mercado', 'Ahorro mensual', 'Pago de proyecto', 'Transporte', 'Reembolso de compra'];
+        $placeholders = implode(', ', array_fill(0, count($legacyConcepts), '?'));
+        $normalize = $pdo->prepare(
+            "UPDATE transactions SET concept = CONCAT(
+                SUBSTRING(concept, 1, LOCATE('] ', concept) + 1),
+                'Transferencia entre cuentas'
+            )
+            WHERE concept LIKE '[AppBank demo v1 #%] %'
+              AND LOCATE('] ', concept) > 0
+              AND SUBSTRING(concept, LOCATE('] ', concept) + 2) IN ($placeholders)"
+        );
+        $normalize->execute($legacyConcepts);
+        $updated = $normalize->rowCount();
+        if ($dryRun) {
+            $pdo->rollBack();
+            echo "Simulación: {$updated} conceptos se actualizarían. Cambios revertidos.\n";
+        } else {
+            $pdo->commit();
+            echo "Demo existente: {$updated} conceptos actualizados; no se duplicaron movimientos.\n";
+        }
     } else {
         foreach (['transactions', 'movements', 'registered_accounts'] as $table) {
             if ((int) $pdo->query("SELECT COUNT(*) FROM {$table}")->fetchColumn() !== 0) {
