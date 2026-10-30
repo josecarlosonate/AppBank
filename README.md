@@ -447,13 +447,17 @@ composer install
 cp .env.example .env
 ```
 
-2. Accede a MySQL desde la terminal:
+2. Accede a MySQL desde la terminal con el usuario administrador `root`:
 
 ```bash
 mysql -u root -p
 ```
 
-3. Ejecuta las siguientes instrucciones en MySQL:
+Introduce la contraseña de `root` que configuraste al instalar MySQL.
+
+3. Crea la base de datos y el usuario que utilizará AppBank. En `IDENTIFIED BY 'tu_password'`, sustituye `tu_password` por la contraseña que quieras asignar a `appbank_user`. Esa misma contraseña debe ir en `DB_PASSWORD` dentro de `.env`.
+
+Ejecuta estas instrucciones en MySQL:
 
 ```sql
 CREATE DATABASE appbank_db
