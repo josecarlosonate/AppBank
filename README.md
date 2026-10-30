@@ -495,7 +495,7 @@ CREATE DATABASE IF NOT EXISTS appbank_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_0900_ai_ci;
 
-CREATE USER 'appbank_user'@'localhost'
+CREATE USER IF NOT EXISTS 'appbank_user'@'localhost'
   IDENTIFIED BY 'CAMBIA_ESTA_CONTRASENA';
 
 GRANT SELECT, INSERT, UPDATE, DELETE
@@ -503,7 +503,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE
   TO 'appbank_user'@'localhost';
 ```
 
-Si el usuario ya existe, no repitas `CREATE USER`; comprueba sus permisos y credenciales. El usuario `root` se utiliza para tareas administrativas y para importar el esquema; `appbank_user` se utiliza para ejecutar la aplicación y cargar los datos.
+Si el usuario ya existe, `CREATE USER IF NOT EXISTS` no falla ni cambia su contraseña. Comprueba que conoces su contraseña; si necesitas restablecerla, ejecuta como administrador `ALTER USER 'appbank_user'@'localhost' IDENTIFIED BY 'TU_NUEVA_CONTRASENA';` y actualiza también `.env`. No ejecutes `ALTER USER` automáticamente en cada instalación. El usuario `root` se utiliza para tareas administrativas y para importar el esquema; `appbank_user` se utiliza para ejecutar la aplicación y cargar los datos.
 
 Sal de MySQL con `exit`.
 
