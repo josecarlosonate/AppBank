@@ -127,6 +127,11 @@
 
                             <?php foreach ($movements as $movement): ?>
                                 <?php
+                                $concept = $movement['concept'] ?? 'Transferencia';
+                                $displayConcept = preg_replace('/^\[AppBank demo v1 #\d+\]\s*/', '', $concept);
+                                $transferLabel = $movement['type'] === 'DEBIT' ? 'Transferencia enviada' : 'Transferencia recibida';
+                                $counterpart = $movement['counterpart_account_number'];
+                                $maskedCounterpart = '•••• ' . substr($counterpart, -4);
                                 $typeClass = $movement['type'] === 'DEBIT' ? 'danger' : 'success';
                                 $formattedBalanceAfter = number_format($movement['balance_after'], 2, ',', '.');
                                 $amountSign = $movement['type'] === 'DEBIT' ? '-' : '+';
@@ -137,8 +142,11 @@
 
                                 <div class="row align-items-center py-3 border-bottom">
                                     <div class="col-5">
-                                        <?= htmlspecialchars($movement['time']) ?> -
-                                        <?= htmlspecialchars($movement['concept'] ?? 'Transferencia') ?>
+                                        <div><?= htmlspecialchars($movement['time']) ?> - <strong><?= htmlspecialchars($transferLabel) ?></strong></div>
+                                        <div class="small text-secondary">Cuenta <?= $movement['type'] === 'DEBIT' ? 'destino' : 'origen' ?>: <?= htmlspecialchars($maskedCounterpart) ?></div>
+                                        <?php if (trim($displayConcept) !== ''): ?>
+                                            <div class="small text-secondary"><?= htmlspecialchars($displayConcept) ?></div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="col-2 text-<?= $typeClass  ?>">
                                         <?= $movement['type'] === 'DEBIT' ? 'Débito' : 'Crédito' ?>

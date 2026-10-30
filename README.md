@@ -223,7 +223,7 @@ El resumen mensual se obtiene de forma asíncrona mediante Fetch API desde un en
 
 ## Credenciales de prueba
 
-La base de datos incluye cuatro clientes de prueba. Todos utilizan la contraseña `Test123`.
+Después de ejecutar `database/seed-demo.php`, la base de datos incluye cuatro clientes de prueba. Todos utilizan la contraseña `Test123`.
 
 | Cliente | Documento | Cuentas | Activas | Inactivas |
 | --- | --- | ---: | ---: | ---: |
@@ -296,7 +296,7 @@ config/
 
 database/
   schema.sql                → Estructura de la base de datos
-  seed.sql                  → Datos de prueba
+  seed-demo.php             → Generador de datos de demostración
 ```
 
 La aplicación utiliza un **Front Controller** como único punto de
@@ -376,24 +376,11 @@ operación (`balance_after`).
 
 ## Cómo ejecutar el proyecto
 
-AppBank puede ejecutarse de dos formas:
-
-1. **Con Docker** — opción recomendada.
-2. **Instalación manual** — utilizando PHP, Composer y MySQL instalados localmente.
-
----
+Puedes ejecutar AppBank con Docker o con PHP y MySQL instalados localmente.
 
 ### Opción 1: Docker
 
-#### Requisitos
-
-- Docker
-- Docker Compose
-- Git
-
-No es necesario instalar PHP, Composer, Apache ni MySQL localmente.
-
-#### Instalación
+**Requisitos:** Git, Docker y Docker Compose.
 
 1. Clona el repositorio:
 
@@ -402,131 +389,123 @@ git clone https://github.com/josecarlosonate/AppBank.git
 cd AppBank
 ```
 
-2. Crea el archivo de configuración .env:
+2. Crea el archivo `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Configura las variables de la base de datos en .env.
+3. Configura las variables de conexión en `.env`:
 
-4. Construye e inicia los contenedores:
+```dotenv
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=appbank_db
+DB_USERNAME=appbank_user
+DB_PASSWORD=tu_password
+MYSQL_ROOT_PASSWORD=tu_password_root
+```
+
+4. Construye la aplicación e inicia MySQL:
 
 ```bash
-docker compose up -d --build
+docker compose build app
+docker compose up -d db
 ```
 
-5. Abre la aplicación en:
+5. Cuando MySQL esté listo, carga los datos de demostración:
 
-```text
-   http://localhost:8080
+```bash
+docker compose run --rm --no-deps app php database/seed-demo.php
 ```
 
-Adminer está disponible en:
+6. Inicia AppBank y Adminer:
 
-```text
-   http://localhost:8081
+```bash
+docker compose up -d app adminer
 ```
 
-La base de datos se inicializa automáticamente durante la primera ejecución utilizando:
+**Aplicación:** http://localhost:8080  
+**Adminer:** http://localhost:8081
 
-```text
-- database/schema.sql
-- database/seed.sql
-```
-
-Para iniciar sesión, utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba).
-
-Detener el proyecto con
+Para detener los contenedores:
 
 ```bash
 docker compose down
 ```
 
-### Opción 2: Instalación manual
+### Opción 2: PHP y MySQL locales
 
-#### Requisitos
+**Requisitos:** Git, PHP 8.3 o superior (64 bits) con `pdo_mysql`, Composer y MySQL 8.4.
 
-- Git
-- PHP 8.3
-- Composer
-- MySQL 8.4
-- Apache con mod_rewrite habilitado
-
-PHP debe tener habilitada la extensión:
-
-```text
-   pdo_mysql
-```
-
-#### Instalación
-
-1. Clona el repositorio:
+1. Clona el repositorio e instala las dependencias:
 
 ```bash
 git clone https://github.com/josecarlosonate/AppBank.git
 cd AppBank
-```
-
-2. Instala las dependencias de PHP:
-
-```bash
 composer install
-```
-
-3. Crea el archivo de configuración .env:
-
-```bash
 cp .env.example .env
 ```
 
-4. Configura las variables de tu base de datos en .env.
+2. Accede a MySQL desde la terminal con el usuario administrador `root`:
 
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=appbank
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_password
-MYSQL_ROOT_PASSWORD=
+```bash
+mysql -u root -p
 ```
 
-5. Crea la base de datos:
+Introduce la contraseña de `root` que configuraste al instalar MySQL.
+
+3. Crea la base de datos y el usuario que utilizará AppBank. En `IDENTIFIED BY 'tu_password'`, sustituye `tu_password` por la contraseña que quieras asignar a `appbank_user`. Esa misma contraseña debe ir en `DB_PASSWORD` dentro de `.env`.
+
+Ejecuta estas instrucciones en MySQL:
 
 ```sql
-CREATE DATABASE appbank
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE appbank_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+CREATE USER 'appbank_user'@'localhost'
+  IDENTIFIED BY 'tu_password';
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON appbank_db.* TO 'appbank_user'@'localhost';
+
+EXIT;
 ```
 
-6. Importa el esquema:
+4. Configura `.env`:
+
+```dotenv
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=appbank_db
+DB_USERNAME=appbank_user
+DB_PASSWORD=tu_password
+```
+
+5. Desde la terminal, importa la estructura de la base de datos:
 
 ```bash
-mysql -u tu_usuario -p appbank < database/schema.sql
+mysql -u root -p appbank_db < database/schema.sql
 ```
 
-7. Importa los datos de prueba:
+6. Genera los datos de demostración:
 
 ```bash
-mysql -u tu_usuario -p appbank < database/seed.sql
+php database/seed-demo.php
 ```
 
-8. Inicia el servidor de desarrollo de PHP.
+7. Inicia la aplicación:
 
 ```bash
 php -S localhost:8000 -t public
 ```
 
-o tambien puedes configurar Apache para utilizar como DocumentRoot y apuntar
-el virtual host al directorio **public/**
+Abre **http://localhost:8000** y utiliza las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
 
-9. Abre la aplicación en:
+### Datos de demostración
 
-```text
-   http://localhost:8000
-```
-
-10. Utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
+`seed-demo.php` crea 4 clientes, 8 cuentas bancarias, 84 transferencias y 168 movimientos distribuidos durante seis meses. El saldo total inicial es de **31.450.000 COP**.
 
 ---
 
