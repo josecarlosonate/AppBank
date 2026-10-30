@@ -376,77 +376,67 @@ operación (`balance_after`).
 
 ## Cómo ejecutar el proyecto
 
-> **Demo local, no banca real.** AppBank utiliza datos ficticios. Las credenciales públicas de ejemplo y el generador no deben usarse en producción.
+Puedes ejecutar AppBank con Docker o con PHP y MySQL instalados localmente.
 
-Puedes ejecutar AppBank con **Docker (recomendado)** o con **PHP y MySQL locales**. En ambos casos se crea primero la estructura de las tablas con `database/schema.sql` y después se generan los datos con `database/seed-demo.php`.
-
-### Opción 1: Docker (recomendada)
+### Opción 1: Docker
 
 **Requisitos:** Git, Docker y Docker Compose.
 
-1. Clona el repositorio y entra a la carpeta:
+1. Clona el repositorio:
 
 ```bash
 git clone https://github.com/josecarlosonate/AppBank.git
 cd AppBank
 ```
 
-> Para probar los cambios antes de integrarlos en `main`, ejecuta `git switch feature/portfolio-demo-seeder` después de clonar.
-
-2. Crea tu configuración local:
+2. Crea el archivo `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Edita **`.env`** y configura los valores para el contenedor MySQL (usa contraseñas propias; no subas el archivo a Git):
+3. Configura las variables de conexión en `.env`:
 
 ```dotenv
 DB_HOST=db
 DB_PORT=3306
 DB_DATABASE=appbank_db
 DB_USERNAME=appbank_user
-DB_PASSWORD=elige_una_clave_local
-MYSQL_ROOT_PASSWORD=elige_otra_clave_local
+DB_PASSWORD=tu_password
+MYSQL_ROOT_PASSWORD=tu_password_root
 ```
 
-4. Construye la aplicación y levanta **solo MySQL** para inicializar el esquema:
+4. Construye la aplicación e inicia MySQL:
 
 ```bash
 docker compose build app
 docker compose up -d db
 ```
 
-Espera a que MySQL esté listo. En una base nueva, Docker importa automáticamente **solo** `database/schema.sql`. No genera clientes ni transferencias por sí solo.
-
-5. Genera los datos de demostración. La primera orden simula y revierte los cambios; la segunda los guarda:
+5. Cuando MySQL esté listo, carga los datos de demostración:
 
 ```bash
-docker compose run --rm --no-deps app php database/seed-demo.php --dry-run
 docker compose run --rm --no-deps app php database/seed-demo.php
 ```
 
-Si aparece un error de conexión al iniciar MySQL, espera unos segundos y vuelve a ejecutar la orden.
-
-6. Inicia la aplicación y Adminer:
+6. Inicia AppBank y Adminer:
 
 ```bash
 docker compose up -d app adminer
 ```
 
-Abre **http://localhost:8080** y entra con las [credenciales de prueba](#credenciales-de-prueba). Adminer está disponible en **http://localhost:8081**.
+**Aplicación:** http://localhost:8080  
+**Adminer:** http://localhost:8081
 
-Para detener los contenedores sin eliminar la base:
+Para detener los contenedores:
 
 ```bash
 docker compose down
 ```
 
-**Importante:** no utilices `docker compose down -v` si quieres conservar los datos; `-v` elimina el volumen de MySQL.
+### Opción 2: PHP y MySQL locales
 
-### Opción 2: Instalación local (PHP + MySQL)
-
-**Requisitos:** Git, PHP **8.3 o superior (64 bits)** con `pdo_mysql`, Composer y MySQL **8.4**. Los siguientes comandos de terminal se pueden ejecutar desde **Git Bash** en Windows. Para desarrollo local se utiliza el servidor integrado de PHP; no es necesario configurar Apache.
+**Requisitos:** Git, PHP 8.3 o superior (64 bits) con `pdo_mysql`, Composer y MySQL 8.4.
 
 1. Clona el repositorio e instala las dependencias:
 
@@ -457,15 +447,13 @@ composer install
 cp .env.example .env
 ```
 
-> Si estás evaluando la rama de la demo antes de su integración, ejecuta `git switch feature/portfolio-demo-seeder`.
-
-2. En la **terminal**, abre MySQL con un usuario administrador:
+2. Accede a MySQL desde la terminal:
 
 ```bash
 mysql -u root -p
 ```
 
-3. Dentro de MySQL (prompt **`mysql>`**), crea la base y un usuario dedicado. Cambia la contraseña del ejemplo:
+3. Ejecuta las siguientes instrucciones en MySQL:
 
 ```sql
 CREATE DATABASE appbank_db
@@ -473,7 +461,7 @@ CREATE DATABASE appbank_db
   COLLATE utf8mb4_0900_ai_ci;
 
 CREATE USER 'appbank_user'@'localhost'
-  IDENTIFIED BY 'elige_una_clave_local';
+  IDENTIFIED BY 'tu_password';
 
 GRANT SELECT, INSERT, UPDATE, DELETE
   ON appbank_db.* TO 'appbank_user'@'localhost';
@@ -481,53 +469,39 @@ GRANT SELECT, INSERT, UPDATE, DELETE
 EXIT;
 ```
 
-Si el usuario ya existe, configura sus permisos en lugar de volver a crearlo. No utilices la cuenta `root` para la conexión habitual de la aplicación.
-
-4. Edita **`.env`** para que coincida con tu base local:
+4. Configura `.env`:
 
 ```dotenv
 DB_HOST=localhost
 DB_PORT=3306
 DB_DATABASE=appbank_db
 DB_USERNAME=appbank_user
-DB_PASSWORD=elige_una_clave_local
+DB_PASSWORD=tu_password
 ```
 
-`MYSQL_ROOT_PASSWORD` solo es necesario para configurar el servicio MySQL de Docker.
-
-5. De vuelta en **Git Bash** (no dentro del prompt de MySQL), importa únicamente el esquema. Se utiliza `root` porque el usuario de la aplicación no tiene permisos para crear tablas:
+5. Desde la terminal, importa la estructura de la base de datos:
 
 ```bash
 mysql -u root -p appbank_db < database/schema.sql
 ```
 
-**Advertencia:** `schema.sql` contiene instrucciones `DROP TABLE`. Ejecútalo únicamente en una base nueva o desechable: podría borrar datos existentes.
-
-6. Carga la demo. Puedes comprobar primero el resultado sin guardar cambios:
+6. Genera los datos de demostración:
 
 ```bash
-php database/seed-demo.php --dry-run
 php database/seed-demo.php
 ```
 
-El generador crea cuatro clientes, ocho cuentas, 84 transferencias y 168 movimientos distribuidos durante seis meses (el actual y los cinco anteriores). Conserva un total de **31.450.000 COP** entre las cuentas. No necesitas importar ningún otro archivo SQL.
-
-7. Inicia el servidor de desarrollo:
+7. Inicia la aplicación:
 
 ```bash
 php -S localhost:8000 -t public
 ```
 
-Abre **http://localhost:8000** e inicia sesión con las [credenciales de prueba](#credenciales-de-prueba). Detén el servidor con `Ctrl+C`.
+Abre **http://localhost:8000** y utiliza las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
 
-### Notas para desarrolladores
+### Datos de demostración
 
-- La carpeta `database/` contiene solo `schema.sql` (estructura) y `seed-demo.php` (datos de ejemplo).
-- `seed-demo.php` está pensado para una **base de demostración**, con la aplicación detenida durante la carga. Detecta la demo existente mediante identificadores internos y evita volver a generar sus transferencias.
-- `--dry-run` ejecuta la simulación dentro de una transacción y revierte los cambios. MySQL puede consumir valores `AUTO_INCREMENT` aunque se haga rollback.
-- Si ya hay datos ajenos a la demo, el generador puede rechazar la carga para evitar alterarlos. No borres una base con información que necesites conservar.
-- La base de Docker se inicializa con el esquema solamente la primera vez que se crea su volumen. Reiniciar los contenedores no vuelve a crear tablas ni datos.
-- `.env` contiene credenciales locales: no lo publiques. Nunca utilices las contraseñas de los usuarios ficticios en un entorno real.
+`seed-demo.php` crea 4 clientes, 8 cuentas bancarias, 84 transferencias y 168 movimientos distribuidos durante seis meses. El saldo total inicial es de **31.450.000 COP**.
 
 ---
 
