@@ -296,7 +296,9 @@ config/
 
 database/
   schema.sql                → Estructura de la base de datos
-  seed.sql                  → Datos de prueba
+  seed.sql                  → Datos iniciales de prueba
+  seed-demo.php             → Historial de demostración
+  DEMO.md                   → Guía del seeder
 ```
 
 La aplicación utiliza un **Front Controller** como único punto de
@@ -448,16 +450,10 @@ docker compose down
 #### Requisitos
 
 - Git
-- PHP 8.3
+- PHP 8.3 con extensión `pdo_mysql`
 - Composer
 - MySQL 8.4
-- Apache con mod_rewrite habilitado
-
-PHP debe tener habilitada la extensión:
-
-```text
-   pdo_mysql
-```
+- Apache con `mod_rewrite` habilitado (opcional si utilizas el servidor de PHP)
 
 #### Instalación
 
@@ -468,65 +464,94 @@ git clone https://github.com/josecarlosonate/AppBank.git
 cd AppBank
 ```
 
-2. Instala las dependencias de PHP:
+Para utilizar el seeder de portafolio mientras esté en esta rama:
+
+```bash
+git switch feature/portfolio-demo-seeder
+```
+
+2. Instala las dependencias:
 
 ```bash
 composer install
 ```
 
-3. Crea el archivo de configuración .env:
+3. Crea el archivo de entorno:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Configura las variables de tu base de datos en .env.
+4. Entra a MySQL con el usuario administrador. La contraseña de `root` se configura al instalar MySQL; **no es la contraseña del usuario de AppBank**:
 
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=appbank
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_password
-MYSQL_ROOT_PASSWORD=
+```bash
+mysql -u root -p
 ```
 
-5. Crea la base de datos:
+5. Crea la base de datos y un usuario dedicado, dentro de la consola de MySQL. Sustituye la contraseña de ejemplo por una contraseña propia y guárdala para el siguiente paso:
 
 ```sql
-CREATE DATABASE appbank
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE IF NOT EXISTS appbank_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+CREATE USER 'appbank_user'@'localhost'
+  IDENTIFIED BY 'CAMBIA_ESTA_CONTRASENA';
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON appbank_db.*
+  TO 'appbank_user'@'localhost';
 ```
 
-6. Importa el esquema:
+Si el usuario ya existe, no repitas `CREATE USER`; comprueba sus permisos y credenciales. El usuario `root` se utiliza para tareas administrativas y para importar el esquema; `appbank_user` se utiliza para ejecutar la aplicación y cargar los datos.
+
+Sal de MySQL con `exit`.
+
+6. Configura las variables en `.env` con la contraseña elegida:
+
+```dotenv
+APP_ENV=local
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=appbank_db
+DB_USERNAME=appbank_user
+DB_PASSWORD="CAMBIA_ESTA_CONTRASENA"
+```
+
+No publiques el archivo `.env` ni compartas contraseñas reales. `MYSQL_ROOT_PASSWORD`, si aparece en el ejemplo de entorno, corresponde a la configuración de Docker y no sustituye a `DB_PASSWORD` en la instalación manual.
+
+7. Importa las tablas en la base recién creada. Ejecuta este comando desde la raíz del proyecto, **fuera de la consola de MySQL**:
 
 ```bash
-mysql -u tu_usuario -p appbank < database/schema.sql
+mysql -u root -p appbank_db < database/schema.sql
 ```
 
-7. Importa los datos de prueba:
+8. Valida la carga de demostración sin guardar cambios:
 
 ```bash
-mysql -u tu_usuario -p appbank < database/seed.sql
+php database/seed-demo.php --dry-run
 ```
 
-8. Inicia el servidor de desarrollo de PHP.
+9. Si la validación termina correctamente, guarda los datos de demostración:
+
+```bash
+php database/seed-demo.php
+```
+
+El script utiliza `database/seed.sql` automáticamente cuando no existen clientes ni cuentas; **no es necesario importar `seed.sql` por separado**. Genera 4 clientes, 8 cuentas, 84 transferencias y 168 movimientos en seis meses, incluido el actual. Solo debe utilizarse en una base de demostración nueva o con los datos originales intactos y sin historial. Detén la aplicación mientras lo ejecutas. No está permitido en `APP_ENV=production`.
+
+10. Inicia el servidor de desarrollo:
 
 ```bash
 php -S localhost:8000 -t public
 ```
 
-o tambien puedes configurar Apache para utilizar como DocumentRoot y apuntar
-el virtual host al directorio **public/**
+Alternativamente, configura Apache con `public/` como `DocumentRoot`.
 
-9. Abre la aplicación en:
+11. Abre `http://localhost:8000` e inicia sesión con las [credenciales de prueba](#credenciales-de-prueba).
 
-```text
-   http://localhost:8000
-```
+Para detalles y restricciones del seeder, consulta [database/DEMO.md](database/DEMO.md).
 
-10. Utiliza cualquiera de las [credenciales de prueba](#credenciales-de-prueba) para iniciar sesión.
 
 ---
 
